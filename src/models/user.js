@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 
 const mongoose = require('../database');
 
+const creditCard = require('./creditCard').schema;
+const contact = require('./contact').schema;
+const transfer = require('./transfer').schema;
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -23,21 +27,18 @@ const UserSchema = new mongoose.Schema({
     select: false,
     default: 0,
   },
-  creditCards: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'CreditCard',
+  creditCards: {
+    type: [creditCard],
     select: false,
-  }],
-  contacts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Contact',
+  },
+  contacts: {
+    type: [contact],
     select: false,
-  }],
-  transfers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Transfer',
+  },
+  transfers: {
+    type: [transfer],
     select: false,
-  }],
+  },
   createdAt: {
     type: Date,
     default: Date.now,

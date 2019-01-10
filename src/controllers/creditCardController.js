@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
 
     const isoExpirationDate = new Date(expirationDate).toISOString();
 
-    const user = await User.findById(req.userId).select('+creditCards');
+    const user = await User.findById(req.userId);
 
     const creditCard = await CreditCard.create({
       number,

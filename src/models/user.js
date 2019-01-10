@@ -18,6 +18,15 @@ const UserSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  balance: {
+    type: Number,
+    select: false,
+    default: 0,
+  },
+  creditCards: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CreditCard',
+  }],
 });
 
 // eslint-disable-next-line func-names

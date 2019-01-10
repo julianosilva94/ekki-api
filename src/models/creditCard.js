@@ -1,6 +1,10 @@
 const mongoose = require('../database');
 
 const CreditCardSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
   number: {
     type: String,
     required: true,

@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
   }],
   contacts: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Contact',
+    ref: 'User',
   }],
   transfers: [{
     type: mongoose.Schema.Types.ObjectId,

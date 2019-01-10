@@ -4,7 +4,6 @@ const helmet = require('helmet');
 
 const authController = require('./controllers/authController');
 const creditCardController = require('./controllers/creditCardController');
-const contactController = require('./controllers/contactController');
 const transferController = require('./controllers/transferController');
 
 require('dotenv').config();
@@ -24,7 +23,6 @@ app.get('/', (req, res) => {
 
 authController(app);
 creditCardController(app);
-contactController(app);
 transferController(app);
 
 app.listen(PORT, HOST);

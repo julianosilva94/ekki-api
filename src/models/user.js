@@ -31,6 +31,10 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Contact',
   }],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // eslint-disable-next-line func-names

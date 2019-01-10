@@ -26,10 +26,17 @@ const UserSchema = new mongoose.Schema({
   creditCards: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CreditCard',
+    select: false,
   }],
   contacts: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Contact',
+    select: false,
+  }],
+  transfers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transfer',
+    select: false,
   }],
   createdAt: {
     type: Date,

@@ -13,14 +13,16 @@ function generateJWT(params = {}) {
 }
 
 router.post('/register', async (req, res) => {
-  const { email } = req.body;
+  const { name, email, password } = req.body;
 
   try {
     if (await User.findOne({ email })) {
       return res.status(400).send({ error: 'E-mail already registered' });
     }
 
-    const user = await User.create(req.body);
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({ name, email, password: hash });
 
     user.password = undefined;
 

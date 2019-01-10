@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:cardId', async (req, res) => {
   try {
-    const creditCard = await CreditCard.findById(req.params.cardId);
+    const creditCard = await CreditCard.findOne({ _id: req.params.cardId, owner: req.userId });
 
     return res.send(creditCard);
   } catch (err) {
@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
 
     await user.save();
 
-    return res.send({ creditCard });
+    return res.send(creditCard);
   } catch (err) {
     return res.status(400).send({ error: 'Error' });
   }
@@ -64,14 +64,21 @@ router.put('/:cardId', async (req, res) => {
 
     const isoExpirationDate = new Date(expirationDate).toISOString();
 
-    const creditCard = await CreditCard.findByIdAndUpdate(req.params.cardId, {
-      number,
-      expirationDate: new Date(isoExpirationDate),
-      holderName,
-      securityCode,
-    }, { new: true });
+    const creditCard = await CreditCard.findOneAndUpdate(
+      {
+        _id: req.params.cardId,
+        owner: req.userId,
+      },
+      {
+        number,
+        expirationDate: new Date(isoExpirationDate),
+        holderName,
+        securityCode,
+      },
+      { new: true },
+    );
 
-    return res.send({ creditCard });
+    return res.send(creditCard);
   } catch (err) {
     return res.status(400).send({ error: 'Error' });
   }
@@ -79,7 +86,7 @@ router.put('/:cardId', async (req, res) => {
 
 router.delete('/:cardId', async (req, res) => {
   try {
-    const creditCard = await CreditCard.findById(req.params.cardId);
+    const creditCard = await CreditCard.findOne({ _id: req.params.cardId, owner: req.userId });
 
     await creditCard.remove();
 

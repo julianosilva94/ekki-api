@@ -1,10 +1,4 @@
-const bcrypt = require('bcryptjs');
-
 const mongoose = require('../database');
-
-const creditCard = require('./creditCard').schema;
-const contact = require('./contact').schema;
-const transfer = require('./transfer').schema;
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -27,30 +21,22 @@ const UserSchema = new mongoose.Schema({
     select: false,
     default: 0,
   },
-  creditCards: {
-    type: [creditCard],
-    select: false,
-  },
-  contacts: {
-    type: [contact],
-    select: false,
-  },
-  transfers: {
-    type: [transfer],
-    select: false,
-  },
+  creditCards: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CreditCard',
+  }],
+  contacts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Contact',
+  }],
+  transfers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transfer',
+  }],
   createdAt: {
     type: Date,
     default: Date.now,
   },
-});
-
-// eslint-disable-next-line func-names
-UserSchema.pre('save', async function (next) {
-  const hash = await bcrypt.hash(this.password, 10);
-  this.password = hash;
-
-  next();
 });
 
 const User = mongoose.model('User', UserSchema);

@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'CreditCard',
   }],
+  contacts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Contact',
+  }],
 });
 
 // eslint-disable-next-line func-names

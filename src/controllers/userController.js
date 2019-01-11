@@ -20,7 +20,7 @@ router.get('/balance', async (req, res) => {
 
 router.get('/contacts', async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).populate('contacts', 'name email');
 
     return res.send({ contacts: user.contacts });
   } catch (err) {
@@ -30,8 +30,10 @@ router.get('/contacts', async (req, res) => {
 
 router.get('/contacts/:contactId', async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
-    const contact = user.contacts.find(c => c === req.params.contactId);
+    const { contactId } = req.params;
+
+    const user = await User.findById(req.userId).populate('contacts', 'name email');
+    const contact = user.contacts.find(c => c.id === contactId);
 
     if (!contact) {
       return res.status(400).send({ error: 'Error' });
@@ -46,30 +48,30 @@ router.get('/contacts/:contactId', async (req, res) => {
 router.post('/contacts', async (req, res) => {
   try {
     // eslint-disable-next-line object-curly-newline
-    const { user } = req.body;
+    const { userId } = req.body;
 
-    if (user === req.userId) {
+    if (userId === req.userId) {
       return res.status(400).send({ error: 'Error' });
     }
 
-    const contact = await User.findById(user);
-
+    const contact = await User.findById(userId).select('name email');
     if (!contact) {
       return res.status(400).send({ error: 'Error' });
     }
 
-    const userLogged = await User.findById(req.userId);
+    const userLogged = await User.findById(req.userId).populate('contacts', 'name email');
 
-    if (userLogged.contacts.includes(user)) {
+    const contacts = userLogged.contacts.map(c => c.id);
+    if (contacts.includes(userId)) {
       return res.status(400).send({ error: 'Error' });
     }
 
     // eslint-disable-next-line no-underscore-dangle
-    user.contacts.push(user);
+    userLogged.contacts.push(userId);
 
     await userLogged.save();
 
-    return res.send({ contacts: userLogged.contacts });
+    return res.send({ contact });
   } catch (err) {
     return res.status(400).send({ error: 'Error' });
   }
@@ -77,13 +79,20 @@ router.post('/contacts', async (req, res) => {
 
 router.delete('/contacts/:contactId', async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).populate('contacts', 'name email');
+    const { contactId } = req.params;
 
-    user.contacts.remove(req.params.contactId);
+    const contacts = user.contacts.map(c => c.id);
+
+    if (!contacts.includes(contactId)) {
+      return res.status(400).send({ error: 'Error' });
+    }
+
+    user.contacts.remove(contactId);
 
     await user.save();
 
-    return res.send({ contacts: user.contacts });
+    return res.send();
   } catch (err) {
     return res.status(400).send({ error: 'Error' });
   }

@@ -8,6 +8,16 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
+router.get('/', async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('+balance');
+
+    return res.send({ user });
+  } catch (err) {
+    return res.status(400).send({ error: 'Error' });
+  }
+});
+
 router.get('/balance', async (req, res) => {
   try {
     const user = await User.findById(req.userId).select('+balance');

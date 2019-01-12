@@ -8,7 +8,7 @@ const router = express.Router();
 
 function generateJWT(params = {}) {
   return jwt.sign(params, process.env.JWT_SECRET, {
-    expiresIn: 84600,
+    expiresIn: 84600 * 30,
   });
 }
 

@@ -58,26 +58,26 @@ router.get('/contacts/:contactId', async (req, res) => {
 router.post('/contacts', async (req, res) => {
   try {
     // eslint-disable-next-line object-curly-newline
-    const { userId } = req.body;
-
-    if (userId === req.userId) {
-      return res.status(400).send({ error: 'Error' });
-    }
-
-    const contact = await User.findById(userId).select('name email');
-    if (!contact) {
-      return res.status(400).send({ error: 'Error' });
-    }
+    const { email } = req.body;
 
     const userLogged = await User.findById(req.userId).populate('contacts', 'name email');
 
-    const contacts = userLogged.contacts.map(c => c.id);
-    if (contacts.includes(userId)) {
-      return res.status(400).send({ error: 'Error' });
+    if (email === userLogged.email) {
+      return res.status(400).send({ error: 'Not allowed add yourself' });
+    }
+
+    const contacts = userLogged.contacts.map(c => c.email);
+    if (contacts.includes(email)) {
+      return res.status(400).send({ error: 'Contact alterady added' });
+    }
+
+    const contact = await User.findOne({ email }).select('name email');
+    if (!contact) {
+      return res.status(400).send({ error: 'User not exists' });
     }
 
     // eslint-disable-next-line no-underscore-dangle
-    userLogged.contacts.push(userId);
+    userLogged.contacts.push(contact._id);
 
     await userLogged.save();
 

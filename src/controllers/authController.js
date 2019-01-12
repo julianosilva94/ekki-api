@@ -28,7 +28,10 @@ router.post('/register', async (req, res) => {
 
     const token = generateJWT({ id: user.id });
 
-    return res.send({ user, jwt: token });
+    const userJson = user.toObject();
+    userJson.jwt = token;
+
+    return res.send({ user: userJson });
   } catch (err) {
     return res.status(400).send({ error: 'Registration failed' });
   }
@@ -37,7 +40,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password +balance');
 
   if (!user) {
     return res.status(400).send({ error: 'E-mail/password wrong' });
@@ -51,7 +54,10 @@ router.post('/login', async (req, res) => {
 
   user.password = undefined;
 
-  return res.send({ user, jwt: token });
+  const userJson = user.toObject();
+  userJson.jwt = token;
+
+  return res.send({ user: userJson });
 });
 
 module.exports = app => app.use('/auth', router);

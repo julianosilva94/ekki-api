@@ -46,7 +46,7 @@ router.get('/contacts/:contactId', async (req, res) => {
     const contact = user.contacts.find(c => c.id === contactId);
 
     if (!contact) {
-      return res.status(400).send({ error: 'Error' });
+      return res.status(400).send({ error: 'Contact not added' });
     }
 
     return res.send({ contact });
@@ -95,7 +95,7 @@ router.delete('/contacts/:contactId', async (req, res) => {
     const contacts = user.contacts.map(c => c.id);
 
     if (!contacts.includes(contactId)) {
-      return res.status(400).send({ error: 'Error' });
+      return res.status(400).send({ error: 'Contact not added' });
     }
 
     user.contacts.remove(contactId);

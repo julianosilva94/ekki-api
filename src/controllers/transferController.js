@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const moment = require('moment');
 
 const authMiddleware = require('../middlewares/auth');
 
@@ -64,6 +65,23 @@ router.post('/', async (req, res) => {
 
     const userTo = await User.findById(to).select('+transfers +balance');
 
+    const twoMinutesOld = moment(new Date()).subtract(2, 'minutes').toDate();
+    const isoTwoMinutesOld = new Date(twoMinutesOld).toISOString();
+
+    const equalTransfer = await Transfer.findOne({
+      value,
+      to,
+      createdAt: {
+        $gt: isoTwoMinutesOld,
+      },
+    });
+
+    if (equalTransfer) {
+      userFrom.transfers.remove(equalTransfer.id);
+      userTo.transfers.remove(equalTransfer.id);
+      await equalTransfer.remove();
+    }
+
     const transfer = await Transfer.create({
       from: req.userId,
       to,
@@ -73,11 +91,12 @@ router.post('/', async (req, res) => {
 
     // eslint-disable-next-line no-underscore-dangle
     userFrom.transfers.push(transfer);
-    userFrom.balance -= convertedValue;
-
-    // eslint-disable-next-line no-underscore-dangle
     userTo.transfers.push(transfer);
-    userTo.balance += convertedValue;
+
+    if (!equalTransfer) {
+      userFrom.balance -= convertedValue;
+      userTo.balance += convertedValue;
+    }
 
     await userFrom.save();
     await userTo.save();

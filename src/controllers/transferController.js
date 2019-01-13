@@ -14,7 +14,8 @@ router.get('/', async (req, res) => {
   try {
     const transfers = await Transfer.find({ $or: [{ from: req.userId }, { to: req.userId }] })
       .populate('from', 'name')
-      .populate('to', 'name');
+      .populate('to', 'name')
+      .sort('-createdAt');
 
     return res.send({ transfers });
   } catch (err) {

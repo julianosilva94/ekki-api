@@ -43,6 +43,8 @@ router.post('/', async (req, res) => {
     const { to, value, usedCreditCard, password } = req.body;
     const convertedValue = parseInt(value, 10);
 
+    let useCreditCard = false;
+
     if (req.userId === to) {
       return res.status(400).send({ error: 'Cannot send to yourself' });
     }
@@ -54,7 +56,11 @@ router.post('/', async (req, res) => {
     const userFrom = await User.findById(req.userId).select('+transfers +balance +password');
 
     if (userFrom.balance < convertedValue) {
-      return res.status(400).send({ error: 'Cannot send more money than have in balance' });
+      if (usedCreditCard) {
+        useCreditCard = true;
+      } else {
+        return res.status(400).send({ error: 'Cannot send more money than have in balance, please use a credit card' });
+      }
     }
 
     if (convertedValue >= 1000 && password) {
@@ -86,7 +92,7 @@ router.post('/', async (req, res) => {
       from: req.userId,
       to,
       value: convertedValue,
-      usedCreditCard,
+      usedCreditCard: useCreditCard,
     });
 
     // eslint-disable-next-line no-underscore-dangle
@@ -94,7 +100,12 @@ router.post('/', async (req, res) => {
     userTo.transfers.push(transfer);
 
     if (!equalTransfer) {
-      userFrom.balance -= convertedValue;
+      if (useCreditCard) {
+        userFrom.balance = 0;
+      } else {
+        userFrom.balance -= convertedValue;
+      }
+
       userTo.balance += convertedValue;
     }
 

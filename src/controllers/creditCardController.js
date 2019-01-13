@@ -34,13 +34,11 @@ router.post('/', async (req, res) => {
     // eslint-disable-next-line object-curly-newline
     const { number, expirationDate, holderName, securityCode } = req.body;
 
-    const isoExpirationDate = new Date(expirationDate).toISOString();
-
     const user = await User.findById(req.userId);
 
     const creditCard = await CreditCard.create({
       number,
-      expirationDate: new Date(isoExpirationDate),
+      expirationDate,
       holderName,
       securityCode,
       owner: req.userId,
@@ -50,33 +48,6 @@ router.post('/', async (req, res) => {
     user.creditCards.push(creditCard);
 
     await user.save();
-
-    return res.send(creditCard);
-  } catch (err) {
-    return res.status(400).send({ error: 'Error' });
-  }
-});
-
-router.put('/:cardId', async (req, res) => {
-  try {
-    // eslint-disable-next-line object-curly-newline
-    const { number, expirationDate, holderName, securityCode } = req.body;
-
-    const isoExpirationDate = new Date(expirationDate).toISOString();
-
-    const creditCard = await CreditCard.findOneAndUpdate(
-      {
-        _id: req.params.cardId,
-        owner: req.userId,
-      },
-      {
-        number,
-        expirationDate: new Date(isoExpirationDate),
-        holderName,
-        securityCode,
-      },
-      { new: true },
-    );
 
     return res.send(creditCard);
   } catch (err) {

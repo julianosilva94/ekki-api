@@ -14,7 +14,7 @@ const CreditCardSchema = new mongoose.Schema({
     required: true,
   },
   expirationDate: {
-    type: Date,
+    type: String,
     required: true,
   },
   holderName: {
@@ -24,6 +24,7 @@ const CreditCardSchema = new mongoose.Schema({
   securityCode: {
     type: Number,
     required: true,
+    select: false,
   },
 });
 

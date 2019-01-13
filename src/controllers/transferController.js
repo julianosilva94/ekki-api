@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 
 const authMiddleware = require('../middlewares/auth');
 
@@ -37,17 +38,27 @@ router.get('/:transferId', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     // eslint-disable-next-line object-curly-newline
-    const { to, value, usedCreditCard } = req.body;
+    const { to, value, usedCreditCard, password } = req.body;
     const convertedValue = parseInt(value, 10);
 
-    if (value <= 0 || req.userId === to) {
-      return res.status(400).send({ error: 'Error' });
+    if (req.userId === to) {
+      return res.status(400).send({ error: 'Cannot send to yourself' });
     }
 
-    const userFrom = await User.findById(req.userId).select('+transfers +balance');
+    if (convertedValue <= 0) {
+      return res.status(400).send({ error: 'Amount need to be greater than 0' });
+    }
+
+    const userFrom = await User.findById(req.userId).select('+transfers +balance +password');
 
     if (userFrom.balance < convertedValue) {
-      return res.status(400).send({ error: 'Error' });
+      return res.status(400).send({ error: 'Cannot send more money than have in balance' });
+    }
+
+    if (convertedValue >= 1000 && password) {
+      if (!await bcrypt.compare(password, userFrom.password)) {
+        return res.status(400).send({ error: 'Wrong password' });
+      }
     }
 
     const userTo = await User.findById(to).select('+transfers +balance');
@@ -55,7 +66,7 @@ router.post('/', async (req, res) => {
     const transfer = await Transfer.create({
       from: req.userId,
       to,
-      convertedValue,
+      value: convertedValue,
       usedCreditCard,
     });
 
@@ -72,7 +83,7 @@ router.post('/', async (req, res) => {
 
     return res.send({ transfer, balance: userFrom.balance });
   } catch (err) {
-    return res.status(400).send({ error: 'Error' });
+    return res.status(400).send({ error: err });
   }
 });
 
